@@ -1,0 +1,78 @@
+from flask import Flask, request, render_template_string, session
+import random
+
+app = Flask(__name__)
+app.secret_key = 'your_secret_key'  # Replace with a real secret key
+
+@app.route('/', methods=['GET', 'POST'])
+def quiz():
+    if request.method == 'POST':
+        session['attempted'] += 1
+        user_answer = int(request.form['answer'])
+        correct_answer = session['num1'] * session['num2']
+        if user_answer == correct_answer:
+            session['correct'] += 1
+            correct = True
+        else:
+            correct = False
+        if session['attempted'] >= 10:
+            return render_template_string(get_result_html(), score=session['correct'])
+        else:
+            session['num1'], session['num2'] = generate_question()
+    else:
+        session['correct'] = 0
+        session['attempted'] = 0
+        session['num1'], session['num2'] = generate_question()
+        correct = None
+
+    return render_template_string(get_quiz_html(), num1=session['num1'], num2=session['num2'], correct=correct)
+
+def generate_question():
+    return random.randint(1, 10), random.randint(1, 10)
+
+def get_quiz_html():
+    # Add CSS for the Caribbean seaside and dolphins here
+    html = '''
+    <html>
+    <head>
+    <style>
+        body {
+            background-color: #87CEEB;
+        }
+        .dolphin {
+            /* Dolphin CSS */
+        }
+    </style>
+    </head>
+    <body>
+        <h1>Arithmetic Quiz</h1>
+        <p>Solve the following multiplication:</p>
+        <form method="post">
+            <label>{{ num1 }} * {{ num2 }} = </label>
+            <input type="number" name="answer" required>
+            <input type="submit" value="Submit">
+        </form>
+        {% if correct != None %}
+            <p>{% if correct %}Correct!{% else %}Wrong!{% endif %}</p>
+            <!-- Implement jumping dolphins on correct answer -->
+        {% endif %}
+    </body>
+    </html>
+    '''
+    return html
+
+def get_result_html():
+    html = '''
+    <html>
+    <body>
+        <h1>Quiz Completed</h1>
+        <p>Your Score: {{ score }} out of 10</p>
+        <a href="/">Try again</a>
+    </body>
+    </html>
+    '''
+    return html
+
+if __name__ == '__main__':
+    app.run(debug=True, port=8082)
+
