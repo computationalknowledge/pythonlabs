@@ -1,0 +1,85 @@
+Write Python Flask program for a simple geography quiz. 
+
+pip install Flask
+
+from flask import Flask, render_template, request
+app = Flask(__name__)
+# Define your questions
+questions = [
+    {"question": "What is the capital of France?", "choices": ["Paris", "Berlin", "London", "Madrid"], "answer": "Paris"},
+    {"question": "Which country is known as the Land of the Rising Sun?", "choices": ["China", "Australia", "Japan", "India"], "answer": "Japan"},
+    {"question": "What is the largest country by land area?", "choices": ["USA", "Russia", "Canada", "China"], "answer": "Russia"},
+    {"question": "Which river is the longest in the world?", "choices": ["Nile", "Amazon", "Yangtze", "Mississippi"], "answer": "Nile"},
+    {"question": "Which desert is the largest in the world?", "choices": ["Sahara", "Arabian", "Gobi", "Kalahari"], "answer": "Sahara"}
+]
+
+@app.route('/', methods=['GET', 'POST'])
+def quiz():
+    if request.method == 'POST':
+        score = 0
+        for i, q in enumerate(questions):
+            user_answer = request.form.get(f'question-{i}')
+            if user_answer == q['answer']:
+                score += 1
+        rank = assign_rank(score)
+        return render_template('result.html', score=score, rank=rank)
+    return render_template('quiz.html', questions=questions)
+
+def assign_rank(score):
+    if score == 5:
+        return "Geographical Genius"
+    elif score >= 3:
+        return "Geography Pro"
+    elif score >= 1:
+        return "Geography Novice"
+    else:
+        return "Better Luck Next Time"
+
+if __name__ == "__main__":
+    app.run(debug=True)
+You'll also need to create two HTML templates (quiz.html and result.html) for this application:
+
+quiz.html - For displaying the quiz questions.
+result.html - For showing the user's score and rank after submission.
+These templates should be placed in a folder named templates in the same directory as your Python script.
+
+
+
+quiz.html 
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Geography Quiz</title>
+</head>
+<body>
+    <h1>Geography Quiz</h1>
+    <form method="POST">
+        {% for q in questions %}
+            <label>{{ q.question }}</label><br>
+            {% for choice in q.choices %}
+                <input type="radio" name="question-{{ loop.index0 }}" value="{{ choice }}"> {{ choice }}<br>
+            {% endfor %}
+            <br>
+        {% endfor %}
+        <input type="submit" value="Submit">
+    </form>
+</body>
+</html>
+result.html Example:
+
+html
+Copy code
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Quiz Results</title>
+</head>
+<body>
+    <h1>Your Score: {{ score }}</h1>
+    <h2>Your Rank: {{ rank }}</h2>
+    <a href="/">Try Again</a>
+</body>
+</html>
+
+Run the Python script to start the Flask application, and access the quiz through your web browser at http://127.0.0.1:5000/. This program is a basic implementation and can be extended with more features and better UI.
